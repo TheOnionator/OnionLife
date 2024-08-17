@@ -1,5 +1,5 @@
 import random
-
+import math
 
 
 WorldList = []
@@ -47,6 +47,8 @@ def generate_initial_organisms(amount, world_list):
         world_list[n][1].append(400/Gene_Metabolic_Rate)
         world_list[n][1].append("Age")
         world_list[n][1].append(0)
+        world_list[n][1].append("Generation")
+        world_list[n][1].append(0)
 
 
 
@@ -59,6 +61,9 @@ def evolution(ticks, total_food_production, world_list):
 
     Time = range(ticks)
     World_Food_Consumption = 0
+
+    born = 0
+    died = 0
 
     for a in Time:
         starvation = 0
@@ -74,9 +79,11 @@ def evolution(ticks, total_food_production, world_list):
             if element[1][9] + (element[1][5] - element[1][3]) <= 0:
                 world_list.remove(element)
                 starvation += 1
+                died += 1
             if element[1][13] >= element[1][11]:
                 world_list.remove(element)
                 old += 1
+                died += 1
             else:
                 # if there is a surplus food in the world
                 if total_food_production > World_Food_Consumption:
@@ -94,6 +101,7 @@ def evolution(ticks, total_food_production, world_list):
                         Gene_Reproduction_Rate = element[0][7]
                         Gene_Mutation_Rate = element[0][9]
 
+                        Stat_Generation = element[1][15] + 1
 
 
 
@@ -173,10 +181,12 @@ def evolution(ticks, total_food_production, world_list):
                         world_list[n][1].append(400/Gene_Metabolic_Rate)
                         world_list[n][1].append("Age")
                         world_list[n][1].append(0)
+                        world_list[n][1].append("Generation")
+                        world_list[n][1].append(Stat_Generation)
 
                         element[1][9] = Gene_Size*50/2
 
-
+                        born += 1
 
                 if World_Food_Consumption > total_food_production:
                     # if the food bar is less than max
@@ -193,6 +203,7 @@ def evolution(ticks, total_food_production, world_list):
                         Gene_Reproduction_Rate = element[0][7]
                         Gene_Mutation_Rate = element[0][9]
 
+                        Stat_Generation = element[1][15] + 1
 
 
 
@@ -272,16 +283,61 @@ def evolution(ticks, total_food_production, world_list):
                         world_list[n][1].append(400/Gene_Metabolic_Rate)
                         world_list[n][1].append("Age")
                         world_list[n][1].append(0)
+                        world_list[n][1].append("Generation")
+                        world_list[n][1].append(Stat_Generation)
 
                         element[1][9] = Gene_Size*50/2
 
-
+                        born += 1
 
 
 
         print("Tick", a+1, " - ", len(world_list), "Creatures", World_Food_Consumption, "  ", starvation, "Died of Starvation  ", old, "Died of Old Age")
         World_Food_Consumption = 0
-    print(world_list[-100])
+
+
+    size_change = 0
+    speed_change = 0
+    metabolism_change = 0
+
+
+    if world_list[-1][0][1] > 10:
+        size_change = (world_list[-1][0][1] / 10) * 100 - 100
+    if world_list[-1][0][1] < 10:
+        size_change = (100 - (world_list[-1][0][1] / 10) * 100) * -1
+
+    if world_list[-1][0][3] > 10:
+        speed_change = (world_list[-1][0][3] / 10) * 100 - 100
+    if world_list[-1][0][3] < 10:
+        speed_change = (100 - (world_list[-1][0][3] / 10) * 100) * -1
+
+    if world_list[-1][0][5] > 10:
+        metabolism_change = (world_list[-1][0][5] / 10) * 100 - 100
+    if world_list[-1][0][5] < 10:
+        metabolism_change = (100 - (world_list[-1][0][5] / 10) * 100) * -1
+
+    food_surplus = round(world_list[-1][1][5] / world_list[-1][1][3], 2)
+    lifetime_offspring = math.floor(round((world_list[-1][1][5] - world_list[-1][1][3])/(world_list[-1][1][7]/2)*world_list[-1][1][11], 3))
+
+    size_change = round(size_change, 2)
+    speed_change = round(speed_change, 2)
+    metabolism_change = round(metabolism_change, 2)
+
+    print("")
+    print(world_list[-1])
+    print("")
+
+    print("Newest Organism", "-", "Generation", world_list[-1][1][15])
+    print("Size ", size_change, "%")
+    print("Speed ", speed_change, "%")
+    print("Metabolism ", metabolism_change, "%")
+    print("Food Surplus", str(food_surplus) + "x", " ", "Gain -", round(world_list[-1][1][5] - world_list[-1][1][3], 2))
+    print("Lifetime Offspring", lifetime_offspring)
+
+    print("")
+
+    print(born, "Born")
+    print(died, "Died")
 
 
 evolution(1000, World_Food_Production, WorldList)
